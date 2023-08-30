@@ -1,7 +1,7 @@
-#include "stm32l1xx_hal.h"
+#include "stm32f1xx_hal.h"
 
 #include "stm32_tm1637.h"
-
+#include "main.h"
 
 void _tm1637Start(void);
 void _tm1637Stop(void);
@@ -13,15 +13,6 @@ void _tm1637ClkLow(void);
 void _tm1637DioHigh(void);
 void _tm1637DioLow(void);
 
-// Configuration.
-
-#define CLK_PORT GPIOC
-#define DIO_PORT GPIOC
-#define CLK_PIN GPIO_PIN_0
-#define DIO_PIN GPIO_PIN_1
-#define CLK_PORT_CLK_ENABLE __HAL_RCC_GPIOC_CLK_ENABLE
-#define DIO_PORT_CLK_ENABLE __HAL_RCC_GPIOC_CLK_ENABLE
-
 
 const char segmentMap[] = {
     0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, // 0-7
@@ -32,16 +23,18 @@ const char segmentMap[] = {
 
 void tm1637Init(void)
 {
-    CLK_PORT_CLK_ENABLE();
-    DIO_PORT_CLK_ENABLE();
-    GPIO_InitTypeDef g = {0};
-    g.Pull = GPIO_PULLUP;
-    g.Mode = GPIO_MODE_OUTPUT_OD; // OD = open drain
-    g.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    g.Pin = CLK_PIN;
-    HAL_GPIO_Init(CLK_PORT, &g);
-    g.Pin = DIO_PIN;
-    HAL_GPIO_Init(DIO_PORT, &g);
+    //we will assume that pin configuration will be made by STM32CubeMX 
+
+    // CLK_PORT_CLK_ENABLE();
+    // DIO_PORT_CLK_ENABLE();
+    // GPIO_InitTypeDef g = {0};
+    // g.Pull = GPIO_PULLUP;
+    // g.Mode = GPIO_MODE_OUTPUT_OD; // OD = open drain
+    // g.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    // g.Pin = CLK_PIN;
+    // HAL_GPIO_Init(CLK_PORT, &g);
+    // g.Pin = DIO_PIN;
+    // HAL_GPIO_Init(DIO_PORT, &g);
 
     tm1637SetBrightness(8);
 }
@@ -138,7 +131,7 @@ void _tm1637WriteByte(unsigned char b)
 void _tm1637DelayUsec(unsigned int i)
 {
     for (; i>0; i--) {
-        for (int j = 0; j < 10; ++j) {
+        for (int j = 0; j < 35; ++j) {
             __asm__ __volatile__("nop\n\t":::"memory");
         }
     }
@@ -146,20 +139,20 @@ void _tm1637DelayUsec(unsigned int i)
 
 void _tm1637ClkHigh(void)
 {
-    HAL_GPIO_WritePin(CLK_PORT, CLK_PIN, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LCD_CLK_GPIO_Port, LCD_CLK_Pin, GPIO_PIN_SET);
 }
 
 void _tm1637ClkLow(void)
 {
-    HAL_GPIO_WritePin(CLK_PORT, CLK_PIN, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LCD_CLK_GPIO_Port, LCD_CLK_Pin, GPIO_PIN_RESET);
 }
 
 void _tm1637DioHigh(void)
 {
-    HAL_GPIO_WritePin(DIO_PORT, DIO_PIN, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LCD_DIO_GPIO_Port, LCD_DIO_Pin, GPIO_PIN_SET);
 }
 
 void _tm1637DioLow(void)
 {
-    HAL_GPIO_WritePin(DIO_PORT, DIO_PIN, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LCD_DIO_GPIO_Port, LCD_DIO_Pin, GPIO_PIN_RESET);
 }
