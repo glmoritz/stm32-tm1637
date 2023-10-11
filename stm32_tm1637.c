@@ -67,6 +67,26 @@ void tm1637DisplayDecimal(int v, int displaySeparator)
     _tm1637Stop();
 }
 
+void tm1637ClearDisplay(int displaySeparator)
+{    
+    _tm1637Start();
+    _tm1637WriteByte(0x40);
+    _tm1637ReadResult();
+    _tm1637Stop();
+
+    _tm1637Start();
+    _tm1637WriteByte(0xc0);
+    _tm1637ReadResult();
+
+    for (int i = 0; i < 4; ++i) {
+        _tm1637WriteByte(segmentMap[16] | (i==2 && displaySeparator)?1<<7:0);
+        _tm1637ReadResult();
+    }
+
+    _tm1637Stop();
+}
+
+
 // Valid brightness values: 0 - 8.
 // 0 = display off.
 void tm1637SetBrightness(char brightness)
